@@ -3,5 +3,8 @@
   "bracketSpacing": true,
   "tabWidth": 2,
   "trailingComma": "none",
-  "semi": false
+  "semi": false,
+  "plugins": ["@trivago/prettier-plugin-sort-imports"],
+  "importOrder": ["^components/(.*)$", "^[./]"],
+  "importOrderSortSpecifiers": true
 }
