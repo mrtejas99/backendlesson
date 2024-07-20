@@ -41,12 +41,10 @@ const userSchema = mongoose.Schema(
     ],
     password: {
       type: String,
-      required: true,
-      select: false
+      required: true
     },
     refreshToken: {
-      type: String,
-      select: false
+      type: String
     }
   },
   { timestamps: true }
@@ -78,24 +76,24 @@ userSchema.methods.isPasswordCorrect = async function (password) {
 }
 
 userSchema.methods.generateAccessToken = function () {
-  jwt.sign(
+  return jwt.sign(
     {
       _id: this.id,
       email: this.email,
       username: this.username,
       fullName: this.fullName
     },
-    process.env.ACCESS_TOKEN_SCERET,
+    process.env.ACCESS_TOKEN_SECRET,
     { expiresIn: process.env.ACCESS_TOKEN_EXPIRY }
   )
 }
 userSchema.methods.generateRefreshToken = function () {
-  jwt.sign(
+  return jwt.sign(
     {
       _id: this.id
     },
-    process.env.ACCESS_TOKEN_SCERET,
-    { expiresIn: process.env.ACCESS_TOKEN_EXPIRY }
+    process.env.REFRESH_TOKEN,
+    { expiresIn: process.env.REFRESH_TOKEN_EXPIRY }
   )
 }
 userSchema.set("toJSON", {
