@@ -5,7 +5,7 @@ class ApiError extends Error {
     errors = [],
     stackTrace = ""
   ) {
-    super(this.message)
+    super(msg)
     this.data = null
     this.message = msg
     this.stack = stackTrace

@@ -30,7 +30,7 @@ const userSchema = mongoose.Schema(
       type: String,
       required: true
     },
-    coverImage: {
+    coverImg: {
       type: String
     },
     watchHistory: [
@@ -41,9 +41,13 @@ const userSchema = mongoose.Schema(
     ],
     password: {
       type: String,
-      required: true
+      required: true,
+      select: false
     },
-    refreshToken: String
+    refreshToken: {
+      type: String,
+      select: false
+    }
   },
   { timestamps: true }
 )
@@ -61,7 +65,7 @@ const userSchema = mongoose.Schema(
 
 userSchema.pre("save", async function (next) {
   if (this.isModified("password")) {
-    this.password = bcrypt.hash(this.password, 10)
+    this.password = await bcrypt.hash(this.password, 10)
   }
   next()
 })
@@ -94,7 +98,13 @@ userSchema.methods.generateRefreshToken = function () {
     { expiresIn: process.env.ACCESS_TOKEN_EXPIRY }
   )
 }
-
+userSchema.set("toJSON", {
+  transform: (doc, ret, options) => {
+    delete ret.password
+    delete ret.refreshToken
+    return ret
+  }
+})
 const User = mongoose.model("User", userSchema)
 
 export default User
