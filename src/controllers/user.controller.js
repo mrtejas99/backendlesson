@@ -160,4 +160,68 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
     )
 })
 
-export { registerUser, loginUser, logoutUser, refreshAccessToken }
+const changePassword = asyncHandler(async (req, res) => {
+  //if user authenticated
+  //read form data
+  //check if same
+  //update in db
+
+  const { oldPassword, newPassword } = req.body
+  if (!oldPassword || !newPassword) {
+    throw new ApiError(401, "old password or new password not specified")
+  }
+
+  const user = await User.findById(req.user?._id)
+  if (!user) {
+    throw new ApiError("401", "user does not exist")
+  }
+
+  const isPasswordMatch = await user.isPasswordCorrect(oldPassword)
+  if (!isPasswordMatch) {
+    throw new ApiError(401, "invalid credentials")
+  }
+  user.password = password
+  await user.save({ validateBeforeSave: false })
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "passowrd changed successfully"))
+})
+
+const getCurrentUser = asyncHandler(async (req, res) => {
+  return res
+    .status(200)
+    .json(new ApiResponse(200, req.user, "current user details"))
+})
+
+const updateAccountDetails = asyncHandler(async (req, res) => {
+  const { fullName, email } = req.body
+  if (!fullName && !email) {
+    throw new ApiError(400, "value cant be blank")
+  }
+
+  const user = await User.findByIdAndUpdate(
+    req.user?._id,
+    { $set: { email, fullName } },
+    { new: true }
+  )
+  if (!user) {
+    throw new ApiError(400, "updation of user info failed")
+  }
+
+  return res
+    .status(201)
+    .json(
+      new ApiResponse(201, user.toJSON, "user details updated successfully")
+    )
+})
+
+export {
+  registerUser,
+  loginUser,
+  logoutUser,
+  refreshAccessToken,
+  changePassword,
+  getCurrentUser,
+  updateAccountDetails
+}
