@@ -4,10 +4,8 @@ import ApiResponse from "../utils/apiResponse.js"
 import asyncHandler from "../utils/asyncHandler.js"
 import uploadFile from "../utils/fileUpload.js"
 
-const generateAccessAndRefreshTokens = async (userId) => {
+const generateAccessAndRefreshTokens = async (user) => {
   try {
-    const user = await User.findById(userId)
-
     const accessToken = user.generateAccessToken()
     const refreshToken = user.generateRefreshToken()
 
@@ -88,9 +86,8 @@ const loginUser = asyncHandler(async (req, res) => {
     throw new ApiError(401, "invalid credentials")
   }
 
-  const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
-    user._id
-  )
+  const { accessToken, refreshToken } =
+    await generateAccessAndRefreshTokens(user)
 
   const loggedInUser = user.toJSON()
   const options = { httpOnly: true, secure: true }
