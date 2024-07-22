@@ -200,9 +200,13 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
     throw new ApiError(400, "value cant be blank")
   }
 
+  let updateFields = {}
+  if (fullName) updateFields.fullName = fullName
+  if (email) updateFields.email = email
+
   const user = await User.findByIdAndUpdate(
     req.user?._id,
-    { $set: { email, fullName } },
+    { $set: updateFields },
     { new: true }
   )
   if (!user) {
@@ -212,7 +216,59 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
   return res
     .status(201)
     .json(
-      new ApiResponse(201, user.toJSON, "user details updated successfully")
+      new ApiResponse(201, user.toJSON(), "user details updated successfully")
+    )
+})
+
+const updateUserAvatar = asyncHandler(async (req, res) => {
+  const avatarLocalPath = req.file?.path
+  if (!avatarLocalPath) throw new ApiError(400, "avatar is missing")
+  const avatar = await uploadFile(avatarLocalPath)
+  if (!avatar) throw new ApiError(400, "avatar did not get uploaded")
+
+  const user = await User.findByIdAndUpdate(
+    req.user?._id,
+    {
+      $set: {
+        avatar: avatar.url
+      }
+    },
+    { new: true }
+  )
+
+  if (!user) {
+    throw new ApiError(400, "failed to update avatar")
+  }
+
+  return res
+    .status(201)
+    .json(new ApiResponse(201, user.toJSON(), "avatar updated successfully"))
+})
+
+const updateCoverImg = asyncHandler(async (req, res) => {
+  const coverImgLocalPath = req.file?.path
+  if (!coverImgLocalPath) throw new ApiError(400, "cover image is missing")
+  const coverImg = await uploadFile(coverImgLocalPath)
+  if (!coverImg) throw new ApiError(400, "cover image did not get uploaded")
+
+  const user = await User.findByIdAndUpdate(
+    req.user?._id,
+    {
+      $set: {
+        coverImg: coverImg.url
+      }
+    },
+    { new: true }
+  )
+
+  if (!user) {
+    throw new ApiError(400, "failed to update cover image")
+  }
+
+  return res
+    .status(201)
+    .json(
+      new ApiResponse(201, user.toJSON(), "cover image updated successfully")
     )
 })
 
@@ -223,5 +279,7 @@ export {
   refreshAccessToken,
   changePassword,
   getCurrentUser,
-  updateAccountDetails
+  updateAccountDetails,
+  updateUserAvatar,
+  updateCoverImg
 }
