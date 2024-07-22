@@ -21,4 +21,20 @@ const uploadFile = async (localFilePath) => {
   fs.unlinkSync(localFilePath)
 }
 
-export default uploadFile
+//delete only image from cloudinary in case a new one is added
+const deleteFile = async (url) => {
+  try {
+    const match = url.match(/\/([^\/]+)\.[^\/]+$/)
+    let shortId = ""
+    if (match) shortId = match[1]
+
+    const response = await cloudinary.uploader.destroy(shortId, (result) => {
+      console.log(result)
+    })
+    console.log(response)
+    return response
+  } catch (e) {
+    console.log(`File upload failed: ${e}`)
+  }
+}
+export { uploadFile, deleteFile }

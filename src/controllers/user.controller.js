@@ -3,7 +3,7 @@ import User from "../models/user.model.js"
 import ApiError from "../utils/apiError.js"
 import ApiResponse from "../utils/apiResponse.js"
 import asyncHandler from "../utils/asyncHandler.js"
-import uploadFile from "../utils/fileUpload.js"
+import { deleteFile, uploadFile } from "../utils/fileUpload.js"
 
 const OPTIONS = { httpOnly: true, secure: true }
 
@@ -180,7 +180,7 @@ const changePassword = asyncHandler(async (req, res) => {
   if (!isPasswordMatch) {
     throw new ApiError(401, "invalid credentials")
   }
-  user.password = password
+  user.password = newPassword
   await user.save({ validateBeforeSave: false })
 
   return res
@@ -239,7 +239,7 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
   if (!user) {
     throw new ApiError(400, "failed to update avatar")
   }
-
+  await deleteFile(req.user?.avatar)
   return res
     .status(201)
     .json(new ApiResponse(201, user.toJSON(), "avatar updated successfully"))
@@ -264,7 +264,7 @@ const updateCoverImg = asyncHandler(async (req, res) => {
   if (!user) {
     throw new ApiError(400, "failed to update cover image")
   }
-
+  await deleteFile(req.user?.coverImg)
   return res
     .status(201)
     .json(
